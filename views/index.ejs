@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  *{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: kobe;
+    color: white;
+  }
+  #main{
+    width: 100%;
+    height: 100vh;
+    background: rgb(37, 37, 37);
+    
+  }
+  .container{
+    max-width: 60vw;
+    border: 2px solid black;
+    margin: 0 auto;
+    height: 90vh;
+    overflow-y: auto;
+    background-color: black;
+    border-radius: 1vw;
+  }
+  .message{
+    max-width: 25vw;
+    margin-top: 1vw;
+    padding: .5vw 1vw;
+    color: white;
+    border-radius: 1vw;
+    display:inline-block;
+    flex-flow: row wrap;
+    word-break: break-all;
+    position: relative;
+  }
+  
+  .left{
+    left: 0%;
+    background-color: rgb(21, 109, 154);
+
+  }
+  .right{
+    background-color: green;
+    left: 100%;
+    transform: translate(-100%,0);
+    
+  } 
+  .send{
+    margin:auto;
+    text-align: center;
+    max-width: 60vw;
+
+  }
+  .send-container{
+    display: flex;
+  }
+  #messageInp{
+    width: 90%;
+    height: 8vh;
+    border-radius: 1vw;
+    resize: none;
+    background-color: rgb(76, 76, 76);
+    color: white;
+    padding: 1vw 2vw;
+    border: .3vw solid black;
+    font-size: 1.3vw;
+    outline: none;
+  }
+  #messageInp::placeholder{
+    color: white;
+
+  }
+  .btn{
+    border-radius: 1vw;
+    width: 10%;
+    padding: 1vw;
+    border: none;
+    font-size: 1.3vw;
+    border: .3vw solid black;
+    color: white;
+    background-color: orange;
+  }
+</style>
+<body>
+  <div id="main">
+    
+    <div class="container">
+      
+    </div>
+    <div class="send">
+      <form class="send-container">
+        <textarea id="messageInp" placeholder="Type a message..." name="messageInp"></textarea>
+        <button class="btn" type="submit">Send</button>
+        </form>
+    
+    </div>
+        
+    
+  </div>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+        integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
+        crossorigin="anonymous"></script>
+    <script>
+        var socket = io()
+
+        const form = document.querySelector('.send-container')
+        const messageInp = document.querySelector('#messageInp')
+        const messageContainer = document.querySelector('.container')
+        
+        const append = (sender,message,position)=>{
+          messageContainer.innerHTML+= `<div class="message ${position}">${sender} : ${message}</div> <br>`
+          messageContainer.scrollTo(0, messageContainer.scrollHeight);
+        }
+      
+      form.addEventListener("submit",(e)=>{
+        e.preventDefault();
+        const message = messageInp.value
+        append(`You`, `${message}`,'right')
+
+        socket.emit('send', message);
+        messageInp.value = '';
+  
+      })
+        
+        messageInp.addEventListener("keyup",(dets)=>{
+            if(dets.keyCode === 13){
+                document.querySelector(".btn").click();
+            }
+        })
+        const name = prompt('Enter Your Name to join')
+        socket.emit('newUserJoined', name)
+        socket.on('user-joined', name=>{
+          append(`${name}`, `joined the chat`, 'right' )
+        })
+        socket.on('receive', (data)=>{
+          append(`${data.name}`, `${data.message}`, 'left' )
+        })
+    </script>
+</body>
+</html>
