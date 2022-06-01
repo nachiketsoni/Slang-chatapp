@@ -1,68 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Sasta-ChatApp</title>
 </head>
-  <link rel="stylesheet" href="../stylesheets/style.css">
+<link rel="stylesheet" href="../stylesheets/style.css">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
 <body>
   <div id="main">
 
+    <div class="online left message"><i class="ri-close-fill"></i><text>Online: <span id="online" ></span></div>
     <div class="container">
       
     </div>
+    <div class="overlay"></div>
     <div class="send">
       <form class="send-container">
         <textarea id="messageInp" placeholder="Type a message..." name="messageInp"></textarea>
-        <button class="btn" type="submit">Send</button>
-        </form>
-    
+        <button class="btn" type="submit"><i class="ri-send-plane-fill"></i></button>
+      </form>
+      <div class="onlineusers">
+        
+      </div>
     </div>
-        
-    
+
+
   </div>
-    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
-        integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
-        crossorigin="anonymous"></script>
-    <script>
-        var socket = io()
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+  <script src="../javascripts/moment.js"></script>
+  <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+    integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
+    crossorigin="anonymous"></script>
+  <script>
+    var socket = io();
 
-        const form = document.querySelector('.send-container')
-        const messageInp = document.querySelector('#messageInp')
-        const messageContainer = document.querySelector('.container')
-        
-        const append = (sender,message,position)=>{
-          messageContainer.innerHTML+= `<div class="message ${position}">${sender} : ${message}</div> <br>`
-          messageContainer.scrollTo(0, messageContainer.scrollHeight);
-        }
-      
-      form.addEventListener("submit",(e)=>{
-        e.preventDefault();
-        const message = messageInp.value
-        if(message.trim().length >0){
-          append(`You`, `${message}`,'right')
-          socket.emit('send', message);
-          messageInp.value = '';
-        }
+    var flag = 0
+    const onlin= document.querySelector(".online")
+    const onuser= document.querySelector(".onlineusers")
 
-      })
+    onlin.addEventListener("click",(e)=>{
+      console.log(e)
+      if(flag===0){
+        var tl = gsap.timeline()
+        tl
+        .to('.onlineusers',{
+          bottom:0,
+          duration:.5,
+
+        },"b")
+        .to(".online text",{
+          opacity:0,
+          duration:.0000002
+        },"b")
+        .to(".online",{
+          width:'2.2vw',
+          height:'2.2vw',
+          duration:.1
+        },"b")
+        .to(".online i",{
+          opacity:1,
+          rotate:0,
+          duration:.1
+
+        },"a")
+
         
-      messageInp.addEventListener("keyup",(dets)=>{
-          console.log()
-            if(dets.keyCode === 13 && messageInp.value.trim().length >0 ){
-                document.querySelector(".btn").click();
-            }
-        })
-        const name = prompt('Enter Your Name to join')
+        flag=1;
+      }
+      else{
+        
+        var tl2 = gsap.timeline()
+        tl2
+        .to('.onlineusers',{
+          bottom:'-80%',
+          duration:.5,
+        },"b")
+        .to(".online i",{
+          opacity:0,
+          rotate:'-60deg',
+
+          duration:.0000002
+
+        },"a")
+        .to(".online",{
+          width:'',
+          height:''
+          
+        },"b")
+        .to(".online text",{
+          opacity:1
+        },"a")
+
+        
+        flag=0;
+      }
+    })
+
+    const form = document.querySelector('.send-container')
+    const messageInp = document.querySelector('#messageInp')
+    const messageContainer = document.querySelector('.container')
+    append = (sender, message, position) => {
+      messageContainer.innerHTML += `<div class="message ${position}">${sender} : ${message} <span id="time">${moment().format('LT')}</span></div> <br>`
+      messageContainer.scrollTo(0, messageContainer.scrollHeight);
+    }
+    socket.on('alluser', username => {
+      document.querySelector("#online").textContent=username.length
+      console.log(username)
+      let clutter = ''
+      username.forEach(elem => {
+        clutter+=`<h1><name>${elem}</name><span>Online <g>·</g></span></h1>`
+      });
+      document.querySelector(".onlineusers").innerHTML=clutter
+    })
+    
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const message = messageInp.value
+      if (message.trim().length > 0) {
+        append(`You`, `${message}`, 'right')
+        socket.emit('send', message);
+        messageInp.value = '';
+
+      }
+    })
+
+    messageInp.addEventListener("keyup", (dets) => {
+      if (dets.keyCode === 13 && messageInp.value.trim().length > 0) {
+        document.querySelector(".btn").click();
+      }
+    })
+
+    function getname() {
+      var name = prompt('Enter Your Name to join')
+      if (name.trim().length > 0) {
         socket.emit('newUserJoined', name)
-        socket.on('user-joined', name=>{
-          append(`${name}`, `joined the chat`, 'right' )
+        socket.on('user-joined', name => {
+          append(`${name}`, `joined the chat`, 'center')
         })
-        socket.on('receive', (data)=>{
-          append(`${data.name}`, `${data.message}`, 'left' )
-        })
-    </script>
+      } else {
+        getname()
+      }
+    }
+    getname()
+    socket.on('user-disconnected', name => {
+      append(`${name}`, `leaved the chat`, 'center')
+    })
+
+    socket.on('receive', (data) => {
+      append(`${data.name}`, `${data.message}`, 'left')
+    })
+  </script>
 </body>
+
 </html>
