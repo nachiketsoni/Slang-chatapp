@@ -13,6 +13,7 @@ io.on("connection", function (socket) {
         
         user.push(name)
         socket.broadcast.emit('user-joined', name)
+        
         io.emit('alluser', user)
         console.log(user)
         socket.on('disconnect', function () {
