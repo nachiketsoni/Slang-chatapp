@@ -16,11 +16,11 @@
   <div id="main">
 
     <div id="center">
-      <div id="menu">
+      <!-- <div id="menu">
         <a href="">Create a Group</a>
         <a href="">Start a Private Chat</a>
         <a href="">Join a Group</a>
-      </div>
+      </div> -->
       <nav>
 
         <div class="online"><i class="ri-close-fill"></i><text>Online:&nbsp;<span id="online"></span></div>
@@ -61,17 +61,17 @@
     const onlin = document.querySelector(".online")
 
     const onuser = document.querySelector(".onlineusers")
-    const menuslide = document.querySelector("#menu")
-    let mflag =0
-    document.querySelector(".menu").addEventListener("click", function () {
-      if (mflag == 0) {
-        menuslide.style.transform = "translateX(0)"
-        mflag = 1
-      } else {
-        menuslide.style.transform = "translateX(-100%)"
-        mflag = 0
-      }
-    })
+    // const menuslide = document.querySelector("#menu")
+    // let mflag =0
+    // document.querySelector(".menu").addEventListener("click", function () {
+    //   if (mflag == 0) {
+    //     menuslide.style.transform = "translateX(0)"
+    //     mflag = 1
+    //   } else {
+    //     menuslide.style.transform = "translateX(-100%)"
+    //     mflag = 0
+    //   }
+    // })
     onlin.addEventListener("click", (e) => {
       console.log(e)
       if (flag === 0) {
